@@ -49,7 +49,7 @@ export function ModelSelector({
       <DropdownMenuTrigger
         asChild
         className={cn(
-          'w-fit data-[state=open]:bg-accent data-[state=open]:text-accent-foreground',
+          'w-fit data-[state=open]:bg-accent/90 data-[state=open]:text-accent-foreground hover:bg-accent/10 hover:text-foreground transition-colors',
           className,
         )}
       >
@@ -86,13 +86,13 @@ export function ModelSelector({
                 className="gap-4 group/item flex flex-row justify-between items-center w-full"
               >
                 <div className="flex flex-col gap-1 items-start">
-                  <div>{chatModel.name}</div>
+                  <div className="font-medium">{chatModel.name}</div>
                   <div className="text-xs text-muted-foreground">
                     {chatModel.description}
                   </div>
                 </div>
 
-                <div className="text-foreground dark:text-foreground opacity-0 group-data-[active=true]/item:opacity-100">
+                <div className="text-vinuni-blue dark:text-primary opacity-0 group-data-[active=true]/item:opacity-100 transition-opacity">
                   <CheckCircleFillIcon />
                 </div>
               </button>

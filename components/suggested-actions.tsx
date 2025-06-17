@@ -12,31 +12,27 @@ interface SuggestedActionsProps {
   selectedVisibilityType: VisibilityType;
 }
 
-function PureSuggestedActions({
-  chatId,
-  append,
-  selectedVisibilityType,
-}: SuggestedActionsProps) {
+function PureSuggestedActions({ chatId, append }: SuggestedActionsProps) {
   const suggestedActions = [
     {
-      title: 'What are the advantages',
-      label: 'of using Next.js?',
-      action: 'What are the advantages of using Next.js?',
+      title: 'What masters degrees',
+      label: 'at VinUni?',
+      action: 'What masters degrees are available at VinUni?',
     },
     {
-      title: 'Write code to',
-      label: `demonstrate djikstra's algorithm`,
-      action: `Write code to demonstrate djikstra's algorithm`,
+      title: 'What are some companies',
+      label: `partners of VinUniversity?`,
+      action: `What are some companies that are partners of VinUniversity?`,
     },
     {
-      title: 'Help me write an essay',
-      label: `about silicon valley`,
-      action: `Help me write an essay about silicon valley`,
+      title: 'Who was the Vice Provost',
+      label: `in 2023?`,
+      action: `Who was the Vice Provost in 2023?`,
     },
     {
-      title: 'What is the weather',
-      label: 'in San Francisco?',
-      action: 'What is the weather in San Francisco?',
+      title: 'What are the main research areas',
+      label: 'in CAS?',
+      action: 'What are the main research areas for CAS?',
     },
   ];
 
@@ -64,9 +60,9 @@ function PureSuggestedActions({
                 content: suggestedAction.action,
               });
             }}
-            className="text-left border rounded-xl px-4 py-3.5 text-sm flex-1 gap-1 sm:flex-col w-full h-auto justify-start items-start"
+            className="text-left border border-vinuni-blue/20 hover:border-vinuni-blue/40 hover:bg-vinuni-blue/5 rounded-xl px-4 py-3.5 text-sm flex-1 gap-1 sm:flex-col w-full h-auto justify-start items-start transition-colors"
           >
-            <span className="font-medium">{suggestedAction.title}</span>
+            <span className="font-medium text-vinuni-blue">{suggestedAction.title}</span>
             <span className="text-muted-foreground">
               {suggestedAction.label}
             </span>

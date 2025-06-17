@@ -7,9 +7,16 @@ import './globals.css';
 import { SessionProvider } from 'next-auth/react';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://chat.vercel.ai'),
-  title: 'Next.js Chatbot Template',
-  description: 'Next.js chatbot template using the AI SDK.',
+  metadataBase: new URL('https://chatvinuni.com'),
+  title: {
+    default: 'VinUniversity AI Assistant',
+    template: '%s | VinUniversity AI Assistant',
+  },
+  description: 'Your intelligent assistant for VinUniversity policies, information, and student services. Get instant answers about academic programs, campus life, and university resources.',
+  keywords: ['VinUniversity', 'VinUni', 'chatbot', 'AI assistant', 'university policies', 'student services', 'academic information'],
+  authors: [{ name: 'VinUniversity' }],
+  creator: 'VinUniversity',
+  publisher: 'VinUniversity',
 };
 
 export const viewport = {
@@ -29,7 +36,7 @@ const geistMono = Geist_Mono({
 });
 
 const LIGHT_THEME_COLOR = 'hsl(0 0% 100%)';
-const DARK_THEME_COLOR = 'hsl(240deg 10% 3.92%)';
+const DARK_THEME_COLOR = 'hsl(213 25% 8%)';
 const THEME_COLOR_SCRIPT = `\
 (function() {
   var html = document.documentElement;

@@ -18,6 +18,9 @@ const buttonVariants = cva(
           'bg-secondary text-secondary-foreground hover:bg-secondary/80',
         ghost: 'hover:bg-accent hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
+        vinuni: 'bg-vinuni-blue text-white hover:bg-vinuni-blue/90 font-medium',
+        'vinuni-outline': 'border border-vinuni-blue text-vinuni-blue bg-transparent hover:bg-vinuni-blue hover:text-white',
+        'vinuni-red': 'bg-vinuni-red text-white hover:bg-vinuni-red/90 font-medium',
       },
       size: {
         default: 'h-10 px-4 py-2',

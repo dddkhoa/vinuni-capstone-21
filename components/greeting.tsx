@@ -11,18 +11,18 @@ export const Greeting = () => {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 10 }}
         transition={{ delay: 0.5 }}
-        className="text-2xl font-semibold"
+        className="text-2xl font-bold text-vinuni-blue"
       >
-        Hello there!
+        Welcome to VinUniversity!
       </motion.div>
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 10 }}
         transition={{ delay: 0.6 }}
-        className="text-2xl text-zinc-500"
+        className="text-2xl text-muted-foreground"
       >
-        How can I help you today?
+        How can I help you with VinUni policies and information today?
       </motion.div>
     </div>
   );
