@@ -23,6 +23,8 @@ import { createDocument } from '@/lib/ai/tools/create-document';
 import { updateDocument } from '@/lib/ai/tools/update-document';
 import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
 import { getWeather } from '@/lib/ai/tools/get-weather';
+import { fileSearchTool } from '@/lib/ai/tools/file-search';
+import { tavilyFileSearchTool } from '@/lib/ai/tools/tavily-file-search';
 import { isProductionEnvironment } from '@/lib/constants';
 import { myProvider } from '@/lib/ai/providers';
 import { entitlementsByUserType } from '@/lib/ai/entitlements';
@@ -159,6 +161,8 @@ export async function POST(request: Request) {
                   'createDocument',
                   'updateDocument',
                   'requestSuggestions',
+                  // 'fileSearch',
+                  'tavilyFileSearch',
                 ],
           experimental_transform: smoothStream({ chunking: 'word' }),
           experimental_generateMessageId: generateUUID,
@@ -170,6 +174,8 @@ export async function POST(request: Request) {
               session,
               dataStream,
             }),
+            // fileSearch: fileSearchTool,
+            tavilyFileSearch: tavilyFileSearchTool,
           },
           onFinish: async ({ response }) => {
             if (session.user?.id) {
@@ -237,6 +243,12 @@ export async function POST(request: Request) {
     if (error instanceof ChatSDKError) {
       return error.toResponse();
     }
+    
+    console.error('Unexpected error in chat route:', error);
+    return new Response(
+      JSON.stringify({ error: 'Something went wrong. Please try again later.' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 }
 

@@ -185,6 +185,15 @@ function PureMultimodalInput({
     [setAttachments],
   );
 
+  const handleRemoveAttachment = useCallback(
+    (attachmentUrl: string) => {
+      setAttachments((currentAttachments) =>
+        currentAttachments.filter((attachment) => attachment.url !== attachmentUrl)
+      );
+    },
+    [setAttachments],
+  );
+
   const { isAtBottom, scrollToBottom } = useScrollToBottom();
 
   useEffect(() => {
@@ -245,7 +254,11 @@ function PureMultimodalInput({
           className="flex flex-row gap-2 overflow-x-scroll items-end"
         >
           {attachments.map((attachment) => (
-            <PreviewAttachment key={attachment.url} attachment={attachment} />
+            <PreviewAttachment 
+              key={attachment.url} 
+              attachment={attachment} 
+              onRemove={() => handleRemoveAttachment(attachment.url)}
+            />
           ))}
 
           {uploadQueue.map((filename) => (
@@ -384,12 +397,13 @@ function PureSendButton({
   return (
     <Button
       data-testid="send-button"
-      className="rounded-full p-1.5 h-fit border dark:border-zinc-600"
+      className="rounded-full p-1.5 h-fit border dark:border-zinc-600 disabled:opacity-50"
       onClick={(event) => {
         event.preventDefault();
         submitForm();
       }}
       disabled={input.length === 0 || uploadQueue.length > 0}
+      variant={input.length > 0 && uploadQueue.length === 0 ? "vinuni" : "outline"}
     >
       <ArrowUpIcon size={14} />
     </Button>
