@@ -15,8 +15,8 @@ const DEFAULT_ERROR_MESSAGE =
 const DENIED_MESSAGE =
   "I'm sorry, but I can only assist with questions related to VinUni-related topics. Please ask questions about admissions, scholarships, courses, faculty, research, campus life, or other university-related topics.";
 const POLICY_DOMAIN = 'site:policy.vinuni.edu.vn';
-const MAX_RESULTS_PER_DOMAIN = 3;
-const MAX_GENERAL_RESULTS = 6; // More results for filtering
+const MAX_RESULTS_PER_DOMAIN = 5;
+const MAX_GENERAL_RESULTS = 5; // More results for filtering
 
 // Create OpenAI client for keyword extraction
 const openai = new OpenAI({
@@ -139,7 +139,7 @@ function filterVinUniResults(results: any[]): any[] {
  * Perform Tavily search: policy domain + general search filtered to VinUni domains
  */
 async function performDualDomainSearch(
-  keywords: string[],
+  keywords: string,
   dataStream?: DataStreamWriter,
 ) {
   try {
@@ -152,15 +152,17 @@ async function performDualDomainSearch(
       },
     });
 
-    const policyQuery = buildSearchQuery(keywords, POLICY_DOMAIN);
+    // const policyQuery = buildSearchQuery(keywords, POLICY_DOMAIN);
+    const policyQuery = `site:policy.vinuni.edu.vn ${keywords}`;
 
     console.log('Policy query:', policyQuery);
 
     const policyResponse = await tavilyClient.search(policyQuery, {
-      searchDepth: 'basic',
+      searchDepth: 'advanced',
       includeImages: false,
       includeAnswer: false,
       maxResults: MAX_RESULTS_PER_DOMAIN,
+      includeRawContent: 'text',
     });
 
     // General search (naive Google search)
@@ -172,14 +174,16 @@ async function performDualDomainSearch(
       },
     });
 
-    const generalQuery = buildSearchQuery(keywords); // No domain restriction
+    // const generalQuery = buildSearchQuery(keywords); // No domain restriction
+    const generalQuery = keywords;
 
     console.log('General query:', generalQuery);
     const generalResponse = await tavilyClient.search(generalQuery, {
-      searchDepth: 'basic',
+      searchDepth: 'advanced',
       includeImages: false,
       includeAnswer: false,
       maxResults: MAX_GENERAL_RESULTS, // Get more results for filtering
+      includeRawContent: 'text',
     });
 
     // Filter general results to only VinUni domains
@@ -276,7 +280,7 @@ async function generateAnswerWithContext(query: string, searchResults: any[]) {
           `Document ${index + 1}:
 Title: ${result.title}
 URL: ${result.url}
-Content: ${result.content}
+Content: ${result.rawContent}
 ---`,
       )
       .join('\n\n');
@@ -321,7 +325,7 @@ function formatCitations(searchResults: any[]) {
   return searchResults.map((result) => ({
     title: result.title,
     url: result.url,
-    content: result.content,
+    content: result.rawContent,
     score: result.score,
   }));
 }
@@ -364,27 +368,27 @@ export const fetchTavilyFileSearch = async ({
       },
     });
 
-    const keywords = await extractKeywords(query);
+    // const keywords = await extractKeywords(query);
 
-    if (keywords.length === 0) {
-      return {
-        answer:
-          "I couldn't extract meaningful keywords from your query. Please try rephrasing your question with more specific terms related to VinUni.",
-        citations: [],
-      };
-    }
+    // if (keywords.length === 0) {
+    //   return {
+    //     answer:
+    //       "I couldn't extract meaningful keywords from your query. Please try rephrasing your question with more specific terms related to VinUni.",
+    //     citations: [],
+    //   };
+    // }
 
     dataStream?.writeData({
       type: 'tool-progress',
       content: {
         step: 'keywords-extracted',
-        keywords,
-        message: `Extracted keywords: ${keywords.join(', ')}`,
+        query,
+        message: `Extracted keywords: ${query}`,
       },
     });
 
     // Step 2: Perform dual domain search
-    const searchResponse = await performDualDomainSearch(keywords, dataStream);
+    const searchResponse = await performDualDomainSearch(query, dataStream);
 
     if (searchResponse.totalCount === 0) {
       return {
@@ -455,8 +459,8 @@ export const fetchTavilyFileSearch = async ({
     return {
       answer,
       citations,
-      searchQuery: `Policy: ${buildSearchQuery(keywords, POLICY_DOMAIN)}\nGeneral: ${buildSearchQuery(keywords)} (filtered to VinUni domains)`,
-      keywords,
+      searchQuery: query,
+      keywords: query,
       searchStats: {
         policyResults: searchResponse.policyCount,
         vinUniDomainResults: searchResponse.mainCount,

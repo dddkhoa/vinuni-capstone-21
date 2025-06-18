@@ -25,9 +25,9 @@ function PureSuggestedActions({ chatId, append }: SuggestedActionsProps) {
       action: `What are some companies that are partners of VinUniversity?`,
     },
     {
-      title: 'Who was the Vice Provost',
+      title: 'Who was the Vice Provost of VinUniversity',
       label: `in 2023?`,
-      action: `Who was the Vice Provost in 2023?`,
+      action: `Who was the Vice Provost of VinUniversity in 2023?`,
     },
     {
       title: 'What are the main research areas',
