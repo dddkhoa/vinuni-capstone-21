@@ -1,15 +1,17 @@
 import OpenAI from "openai";
-import { tool } from 'ai';
+import { tool, DataStreamWriter } from 'ai';
 import { z } from 'zod';
-import { fileSearchPromptInstruction } from '@/lib/ai/prompts';
-import { tavily, TavilySearchOptions } from '@tavily/core';
+import { fileSearchPromptInstruction, vinUniTopicPrompt } from '@/lib/ai/prompts';
+import { tavily } from '@tavily/core';
+import { Session } from 'next-auth';
 
 // Constants and environment variables
 const OPENAI_MODEL_KEYWORD_EXTRACTION = "gpt-4o-mini";
 const DEFAULT_ERROR_MESSAGE = "An unexpected error has occurred. Please refresh the page, delete this chat or try again later!";
-const DENIED_MESSAGE = "I'm sorry, but I can only assist with questions related to VinUni-related topics.";
-const SITE_DOMAIN = "site:policy.vinuni.edu.vn/";
-const MAX_RESULTS = 5;
+const DENIED_MESSAGE = "I'm sorry, but I can only assist with questions related to VinUni-related topics. Please ask questions about admissions, scholarships, courses, faculty, research, campus life, or other university-related topics.";
+const POLICY_DOMAIN = "site:policy.vinuni.edu.vn";
+const MAX_RESULTS_PER_DOMAIN = 3;
+const MAX_GENERAL_RESULTS = 6; // More results for filtering
 
 // Create OpenAI client for keyword extraction
 const openai = new OpenAI({
@@ -76,29 +78,145 @@ Response: ["financial aid", "application", "apply"]`
 }
 
 /**
- * Build search query for Tavily
+ * Check if a URL belongs to a VinUni domain (ends with .vinuni.edu.vn)
  */
-function buildSearchQuery(keywords: string[]): string {
-  const quotedKeywords = keywords.map(keyword => `"${keyword}"`).join(' ');
-  return `${SITE_DOMAIN} ${quotedKeywords}`;
+function isVinUniDomain(url: string): boolean {
+  try {
+    const urlObj = new URL(url);
+    const hostname = urlObj.hostname.toLowerCase();
+    return hostname.endsWith('.vinuni.edu.vn') || hostname === 'vinuni.edu.vn';
+  } catch {
+    return false;
+  }
 }
 
 /**
- * Perform Tavily search
+ * Build search query for Tavily
  */
-async function performTavilySearch(searchQuery: string) {
+function buildSearchQuery(keywords: string[], domain?: string): string {
+  const quotedKeywords = keywords.map(keyword => `"${keyword}"`).join(' ');
+  return domain ? `${domain} ${quotedKeywords}` : quotedKeywords;
+}
+
+/**
+ * Filter search results to only include VinUni domains
+ */
+function filterVinUniResults(results: any[]): any[] {
+  return results.filter(result => {
+    if (!result.url) return false;
+    return isVinUniDomain(result.url);
+  });
+}
+
+/**
+ * Perform Tavily search: policy domain + general search filtered to VinUni domains
+ */
+async function performDualDomainSearch(keywords: string[], dataStream?: DataStreamWriter) {
   try {
-    const response = await tavilyClient.search(searchQuery, {
+    // Search policy domain
+    dataStream?.writeData({
+      type: 'tool-progress',
+      content: { step: 'search-policy', message: 'Searching policy.vinuni.edu.vn...' }
+    });
+    
+    const policyQuery = buildSearchQuery(keywords, POLICY_DOMAIN);
+
+    console.log("Policy query:", policyQuery);
+
+    const policyResponse = await tavilyClient.search(policyQuery, {
       searchDepth: "basic",
       includeImages: false,
       includeAnswer: false,
-      maxResults: MAX_RESULTS,
+      maxResults: MAX_RESULTS_PER_DOMAIN,
     });
 
-    return response;
+    // General search (naive Google search)
+    dataStream?.writeData({
+      type: 'tool-progress',
+      content: { step: 'search-general', message: 'Searching web for VinUni domains...' }
+    });
+    
+    const generalQuery = buildSearchQuery(keywords); // No domain restriction
+
+    console.log("General query:", generalQuery);
+    const generalResponse = await tavilyClient.search(generalQuery, {
+      searchDepth: "basic",
+      includeImages: false,
+      includeAnswer: false,
+      maxResults: MAX_GENERAL_RESULTS, // Get more results for filtering
+    });
+
+    // Filter general results to only VinUni domains
+    const filteredGeneralResults = filterVinUniResults(generalResponse.results || []);
+    
+    dataStream?.writeData({
+      type: 'tool-progress',
+      content: { 
+        step: 'filter-results', 
+        message: `Filtered ${generalResponse.results?.length || 0} general results to ${filteredGeneralResults.length} VinUni domain results` 
+      }
+    });
+
+    // Take top results from filtered general search
+    const topGeneralResults = filteredGeneralResults.slice(0, MAX_RESULTS_PER_DOMAIN);
+
+    // Combine results
+    const combinedResults = [
+      ...(policyResponse.results || []),
+      ...topGeneralResults
+    ];
+
+    // Sort by score and take best results
+    const sortedResults = combinedResults
+      .sort((a, b) => (b.score || 0) - (a.score || 0))
+      .slice(0, 6); // Maximum 6 results total
+
+    return {
+      results: sortedResults,
+      policyCount: policyResponse.results?.length || 0,
+      mainCount: topGeneralResults.length,
+      totalCount: sortedResults.length,
+      generalSearchTotal: generalResponse.results?.length || 0,
+      filteredFromGeneral: filteredGeneralResults.length
+    };
   } catch (error) {
-    console.error("Tavily search failed:", error);
+    console.error("Dual domain search failed:", error);
     throw error;
+  }
+}
+
+/**
+ * Check if query is VinUni-related using enhanced validation
+ */
+async function validateVinUniQuery(query: string): Promise<{ isValid: boolean; reason?: string }> {
+  try {
+    const prompt = `${vinUniTopicPrompt}
+
+USER QUESTION: ${query}
+
+Respond with only "VALID" if the question is related to VinUni or university topics as defined in the instructions, or "DENIED" if it's not related.`;
+
+    const response = await openai.chat.completions.create({
+      model: OPENAI_MODEL_KEYWORD_EXTRACTION,
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0,
+      max_tokens: 10
+    });
+
+    const result = response.choices[0]?.message?.content?.trim();
+    
+    if (result === "DENIED") {
+      return { 
+        isValid: false, 
+        reason: "Your question doesn't appear to be related to VinUni or university topics. Please ask about admissions, courses, policies, campus life, or other university-related matters."
+      };
+    }
+    
+    return { isValid: true };
+  } catch (error) {
+    console.error("Query validation failed:", error);
+    // Default to allowing the query if validation fails
+    return { isValid: true };
   }
 }
 
@@ -162,68 +280,127 @@ function formatCitations(searchResults: any[]) {
 }
 
 /**
- * Main function to fetch Tavily search results
+ * Main function to fetch Tavily search results with enhanced flow
  */
 export const fetchTavilyFileSearch = async ({
   query,
+  dataStream,
 }: {
   query: string;
+  dataStream?: DataStreamWriter;
 }) => {
   try {
+    // Step 0: Validate if query is VinUni-related
+    dataStream?.writeData({
+      type: 'tool-progress',
+      content: { step: 'validate-query', message: 'Validating query relevance...' }
+    });
+    
+    const validation = await validateVinUniQuery(query);
+    if (!validation.isValid) {
+      return {
+        answer: validation.reason || DENIED_MESSAGE,
+        citations: [],
+        denied: true
+      };
+    }
+
     // Step 1: Extract keywords from query
+    dataStream?.writeData({
+      type: 'tool-progress',
+      content: { step: 'extract-keywords', message: 'Extracting keywords from query...' }
+    });
+    
     const keywords = await extractKeywords(query);
     
     if (keywords.length === 0) {
       return {
-        answer: "I couldn't extract meaningful keywords from your query. Please try rephrasing your question.",
+        answer: "I couldn't extract meaningful keywords from your query. Please try rephrasing your question with more specific terms related to VinUni.",
         citations: []
       };
     }
 
-    // Step 2: Build search query
-    const searchQuery = buildSearchQuery(keywords);
+    dataStream?.writeData({
+      type: 'tool-progress',
+      content: { step: 'keywords-extracted', keywords, message: `Extracted keywords: ${keywords.join(', ')}` }
+    });
+
+    // Step 2: Perform dual domain search
+    const searchResponse = await performDualDomainSearch(keywords, dataStream);
     
-    // Step 3: Perform Tavily search
-    const searchResponse = await performTavilySearch(searchQuery);
-    
-    if (!searchResponse.results || searchResponse.results.length === 0) {
+    if (searchResponse.totalCount === 0) {
       return {
-        answer: "I couldn't find any relevant information in the VinUni policy documents for your query. Please try rephrasing your question or check if your question is related to VinUni policies.",
-        citations: []
+        answer: "I couldn't find any relevant information in the VinUni documents for your query. This could mean:\n\n1. The information might not be available in our indexed documents\n2. Try rephrasing your question with different keywords\n3. Your question might be too specific or too broad\n\nPlease try rephrasing your search query or ask about other VinUni-related topics such as admissions, courses, policies, or campus life.",
+        citations: [],
+        searchStats: {
+          policyResults: searchResponse.policyCount,
+          vinUniDomainResults: searchResponse.mainCount,
+          totalResults: searchResponse.totalCount,
+          generalSearchTotal: searchResponse.generalSearchTotal,
+          filteredFromGeneral: searchResponse.filteredFromGeneral
+        }
       };
     }
 
-    // Step 4: Generate answer using search results as context
+    dataStream?.writeData({
+      type: 'tool-progress',
+      content: { 
+        step: 'search-complete', 
+        resultsCount: searchResponse.totalCount,
+        message: `Found ${searchResponse.totalCount} relevant documents (${searchResponse.policyCount} from policy site, ${searchResponse.mainCount} from VinUni domains)` 
+      }
+    });
+
+    // Step 3: Generate answer using search results as context
+    dataStream?.writeData({
+      type: 'tool-progress',
+      content: { step: 'generate-answer', message: 'Analyzing documents and generating answer...' }
+    });
+    
     const answer = await generateAnswerWithContext(query, searchResponse.results);
     
     // Handle denial case
     if (answer === "DENIED") {
       return {
         answer: DENIED_MESSAGE,
-        citations: []
+        citations: [],
+        denied: true
       };
     }
 
     // Handle not found case
     if (answer === "NOT_FOUND") {
       return {
-        answer: "I couldn't find specific information to answer your question in the VinUni policy documents.",
-        citations: formatCitations(searchResponse.results)
+        answer: "I couldn't find specific information to answer your question in the available VinUni documents. Please try rephrasing your question or ask about other VinUni-related topics.",
+        citations: formatCitations(searchResponse.results),
+        searchStats: {
+          policyResults: searchResponse.policyCount,
+          vinUniDomainResults: searchResponse.mainCount,
+          totalResults: searchResponse.totalCount,
+          generalSearchTotal: searchResponse.generalSearchTotal,
+          filteredFromGeneral: searchResponse.filteredFromGeneral
+        }
       };
     }
 
-    // Step 5: Format citations
+    // Step 4: Format citations
     const citations = formatCitations(searchResponse.results);
 
     return {
       answer,
       citations,
-      searchQuery, // Include for debugging/transparency
-      keywords // Include for debugging/transparency
+      searchQuery: `Policy: ${buildSearchQuery(keywords, POLICY_DOMAIN)}\nGeneral: ${buildSearchQuery(keywords)} (filtered to VinUni domains)`,
+      keywords,
+      searchStats: {
+        policyResults: searchResponse.policyCount,
+        vinUniDomainResults: searchResponse.mainCount,
+        totalResults: searchResponse.totalCount,
+        generalSearchTotal: searchResponse.generalSearchTotal,
+        filteredFromGeneral: searchResponse.filteredFromGeneral
+      }
     };
   } catch (error) {
     console.error("Tavily file search error:", error);
-    // Return graceful error response
     return {
       answer: DEFAULT_ERROR_MESSAGE,
       citations: []
@@ -231,11 +408,16 @@ export const fetchTavilyFileSearch = async ({
   }
 };
 
+interface TavilyFileSearchProps {
+  session: Session;
+  dataStream: DataStreamWriter;
+}
+
 /**
  * AI tool definition for integration
  */
-export const tavilyFileSearchTool = tool({
-  description: `Search and retrieve answers from VinUni policy documents using Tavily search engine. This tool searches specifically within policy.vinuni.edu.vn for university-related information.`,
+export const tavilyFileSearchTool = ({ session, dataStream }: TavilyFileSearchProps) => tool({
+  description: `Search and retrieve answers from VinUni documents using Tavily search engine. This tool searches policy.vinuni.edu.vn and performs general web searches filtered to VinUni domains (*.vinuni.edu.vn) for comprehensive university-related information.`,
   parameters: z.object({
     query: z.string().describe('The search query to find relevant answers from VinUni policy documents.')
   }),
@@ -246,7 +428,7 @@ export const tavilyFileSearchTool = tool({
         return "I'm unable to search VinUni policy documents at the moment. Please try again later.";
       }
 
-      const results = await fetchTavilyFileSearch({ query });
+      const results = await fetchTavilyFileSearch({ query, dataStream });
       return results;
     } catch (error) {
       console.error("Tavily file search tool error:", error);

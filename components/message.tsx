@@ -18,6 +18,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { MessageEditor } from './message-editor';
 import { DocumentPreview } from './document-preview';
 import { MessageReasoning } from './message-reasoning';
+import { SearchToolCall, SearchToolResult } from './search-tool-display';
 import type { UseChatHelpers } from '@ai-sdk/react';
 
 const PurePreviewMessage = ({
@@ -164,7 +165,7 @@ const PurePreviewMessage = ({
                     <div
                       key={toolCallId}
                       className={cx({
-                        skeleton: ['getWeather'].includes(toolName),
+                        skeleton: ['getWeather', 'tavilyFileSearch', 'dualSearch'].includes(toolName),
                       })}
                     >
                       {toolName === 'getWeather' ? (
@@ -183,6 +184,8 @@ const PurePreviewMessage = ({
                           args={args}
                           isReadonly={isReadonly}
                         />
+                      ) : toolName === 'tavilyFileSearch' || toolName === 'dualSearch' ? (
+                        <SearchToolCall args={args} />
                       ) : null}
                     </div>
                   );
@@ -212,6 +215,8 @@ const PurePreviewMessage = ({
                           result={result}
                           isReadonly={isReadonly}
                         />
+                      ) : toolName === 'tavilyFileSearch' || toolName === 'dualSearch' ? (
+                        <SearchToolResult result={result} />
                       ) : (
                         <pre>{JSON.stringify(result, null, 2)}</pre>
                       )}

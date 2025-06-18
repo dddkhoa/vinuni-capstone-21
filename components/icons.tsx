@@ -1172,3 +1172,71 @@ export const WarningIcon = ({ size = 16 }: { size?: number }) => {
     </svg>
   );
 };
+
+export const ChevronRightIcon = ({ size = 16 }: { size?: number }) => (
+  <svg
+    height={size}
+    strokeLinejoin="round"
+    viewBox="0 0 16 16"
+    width={size}
+    style={{ color: 'currentcolor' }}
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M6.22 3.22a.75.75 0 011.06 0L11.53 7.47a.75.75 0 010 1.06L7.28 12.78a.75.75 0 01-1.06-1.06L9.94 8 6.22 4.28a.75.75 0 010-1.06z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
+export const SearchIcon = ({ size = 16 }: { size?: number }) => (
+  <svg
+    height={size}
+    strokeLinejoin="round"
+    viewBox="0 0 16 16"
+    width={size}
+    style={{ color: 'currentcolor' }}
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M6.5 1.5a5 5 0 104.95 4.05l3.22 3.22a.75.75 0 11-1.06 1.06L10.39 6.61A5 5 0 016.5 1.5zM3 6.5a3.5 3.5 0 117 0 3.5 3.5 0 01-7 0z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
+export const FileTextIcon = ({ size = 16 }: { size?: number }) => (
+  <svg
+    height={size}
+    strokeLinejoin="round"
+    viewBox="0 0 16 16"
+    width={size}
+    style={{ color: 'currentcolor' }}
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M3 2.5C3 1.67157 3.67157 1 4.5 1H8.68934C9.13804 1 9.56841 1.17804 9.88388 1.49351L13.5066 5.11612C13.822 5.43159 14 5.86196 14 6.31066V13.5C14 14.3284 13.3284 15 12.5 15H4.5C3.67157 15 3 14.3284 3 13.5V2.5ZM4.5 2.5V13.5H12.5V6.31066L8.68934 2.5H4.5ZM5.75 5.75C5.33579 5.75 5 6.08579 5 6.5C5 6.91421 5.33579 7.25 5.75 7.25H7.75C8.16421 7.25 8.5 6.91421 8.5 6.5C8.5 6.08579 8.16421 5.75 7.75 5.75H5.75ZM5 9.5C5 9.08579 5.33579 8.75 5.75 8.75H10.25C10.6642 8.75 11 9.08579 11 9.5C11 9.91421 10.6642 10.25 10.25 10.25H5.75C5.33579 10.25 5 9.91421 5 9.5ZM5.75 11.75C5.33579 11.75 5 12.0858 5 12.5C5 12.9142 5.33579 13.25 5.75 13.25H10.25C10.6642 13.25 11 12.9142 11 12.5C11 12.0858 10.6642 11.75 10.25 11.75H5.75Z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
+export const ExternalLinkIcon = ({ size = 16 }: { size?: number }) => (
+  <svg
+    height={size}
+    strokeLinejoin="round"
+    viewBox="0 0 16 16"
+    width={size}
+    style={{ color: 'currentcolor' }}
+  >
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M10.5 1.5H13.5C13.7761 1.5 14 1.72386 14 2V5C14 5.27614 13.7761 5.5 13.5 5.5C13.2239 5.5 13 5.27614 13 5V3.20711L6.35355 9.85355C6.15829 10.0488 5.84171 10.0488 5.64645 9.85355C5.45118 9.65829 5.45118 9.34171 5.64645 9.14645L12.2929 2.5H10.5C10.2239 2.5 10 2.27614 10 2C10 1.72386 10.2239 1.5 10.5 1.5ZM2.5 4.5C2.5 3.39543 3.39543 2.5 4.5 2.5H7C7.27614 2.5 7.5 2.72386 7.5 3C7.5 3.27614 7.27614 3.5 7 3.5H4.5C3.94772 3.5 3.5 3.94772 3.5 4.5V12.5C3.5 13.0523 3.94772 13.5 4.5 13.5H12.5C13.0523 13.5 13.5 13.0523 13.5 12.5V10C13.5 9.72386 13.7239 9.5 14 9.5C14.2761 9.5 14.5 9.72386 14.5 10V12.5C14.5 13.6046 13.6046 14.5 12.5 14.5H4.5C3.39543 14.5 2.5 13.6046 2.5 12.5V4.5Z"
+      fill="currentColor"
+    />
+  </svg>
+);

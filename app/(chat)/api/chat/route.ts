@@ -23,8 +23,7 @@ import { createDocument } from '@/lib/ai/tools/create-document';
 import { updateDocument } from '@/lib/ai/tools/update-document';
 import { requestSuggestions } from '@/lib/ai/tools/request-suggestions';
 import { getWeather } from '@/lib/ai/tools/get-weather';
-import { fileSearchTool } from '@/lib/ai/tools/file-search';
-import { tavilyFileSearchTool } from '@/lib/ai/tools/tavily-file-search';
+import { dualSearchTool } from '@/lib/ai/tools/dual-search';
 import { isProductionEnvironment } from '@/lib/constants';
 import { myProvider } from '@/lib/ai/providers';
 import { entitlementsByUserType } from '@/lib/ai/entitlements';
@@ -158,11 +157,10 @@ export async function POST(request: Request) {
               ? []
               : [
                   'getWeather',
-                  'createDocument',
-                  'updateDocument',
+                  'createDocument',    
+                  'updateDocument',     
                   'requestSuggestions',
-                  // 'fileSearch',
-                  'tavilyFileSearch',
+                  'dualSearch',
                 ],
           experimental_transform: smoothStream({ chunking: 'word' }),
           experimental_generateMessageId: generateUUID,
@@ -174,8 +172,7 @@ export async function POST(request: Request) {
               session,
               dataStream,
             }),
-            // fileSearch: fileSearchTool,
-            tavilyFileSearch: tavilyFileSearchTool,
+            dualSearch: dualSearchTool({ session, dataStream }),
           },
           onFinish: async ({ response }) => {
             if (session.user?.id) {

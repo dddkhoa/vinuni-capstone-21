@@ -271,3 +271,40 @@ pnpm dev
 
 For questions, please contact us at:
 21khoa.ddd@vinuni.edu.vn or 21lam.nt@vinuni.edu.vn
+
+## Enhanced VinUni Search System
+
+This application features an enhanced search system specifically designed for VinUni (VinUniversity) document searches:
+
+### Key Features:
+
+1. **Dual Domain Search**: Automatically searches both `policy.vinuni.edu.vn` and `vinuni.edu.vn` domains
+2. **Top Results Collection**: Collects top 3 results from each domain (maximum 6 total)
+3. **Enhanced Guardrails**: Validates queries to ensure they're VinUni-related before searching
+4. **Tool Usage Enforcement**: Forces the AI to use the search tool for all VinUni queries
+5. **Transparent Search Process**: Shows detailed progress and search statistics
+
+### Search Flow:
+
+1. **Query Validation**: Checks if the question is VinUni-related
+2. **Keyword Extraction**: Extracts meaningful keywords from the user query
+3. **Dual Domain Search**: Searches both VinUni domains simultaneously
+4. **Result Processing**: Combines and ranks results by relevance
+5. **Answer Generation**: Creates comprehensive answers based on found documents
+
+### UI Features:
+
+- **Real-time Progress**: Shows search steps as they happen
+- **Search Statistics**: Displays results count from each domain
+- **Source Citations**: Provides links to original documents
+- **Keyword Display**: Shows extracted search keywords
+- **Error Handling**: Clear messaging for invalid queries or no results
+
+### Tool Enforcement:
+
+- AI must explicitly announce when using the search tool
+- No document creation/editing tools for search queries
+- Automatic fallback messages for insufficient results
+- Strict adherence to VinUni-only content policy
+
+This system ensures accurate, transparent, and comprehensive responses to VinUni-related queries while preventing hallucination and maintaining strict content guidelines.

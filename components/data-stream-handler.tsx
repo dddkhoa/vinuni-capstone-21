@@ -17,8 +17,27 @@ export type DataStreamDelta = {
     | 'suggestion'
     | 'clear'
     | 'finish'
-    | 'kind';
-  content: string | Suggestion;
+    | 'kind'
+    | 'tool-progress';
+  content: string | Suggestion | {
+    step: string;
+    message: string;
+    keywords?: string[];
+    searchQuery?: string;
+    resultsCount?: number;
+    resultsFound?: boolean;
+    // Legacy search stats (tavily tool)
+    policyResults?: number;
+    mainResults?: number;
+    totalResults?: number;
+    // Dual search stats
+    fileResults?: boolean;
+    tavilyResults?: boolean;
+    totalCitations?: number;
+    // General search filtering stats
+    generalSearchTotal?: number;
+    filteredFromGeneral?: number;
+  };
 };
 
 export function DataStreamHandler({ id }: { id: string }) {
