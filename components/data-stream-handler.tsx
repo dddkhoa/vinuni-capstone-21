@@ -2,8 +2,8 @@
 
 import { useChat } from '@ai-sdk/react';
 import { useEffect, useRef } from 'react';
-import { artifactDefinitions, ArtifactKind } from './artifact';
-import { Suggestion } from '@/lib/db/schema';
+import { artifactDefinitions, type ArtifactKind } from './artifact';
+import type { Suggestion } from '@/lib/db/schema';
 import { initialArtifactData, useArtifact } from '@/hooks/use-artifact';
 
 export type DataStreamDelta = {
@@ -19,25 +19,28 @@ export type DataStreamDelta = {
     | 'finish'
     | 'kind'
     | 'tool-progress';
-  content: string | Suggestion | {
-    step: string;
-    message: string;
-    keywords?: string[];
-    searchQuery?: string;
-    resultsCount?: number;
-    resultsFound?: boolean;
-    // Legacy search stats (tavily tool)
-    policyResults?: number;
-    mainResults?: number;
-    totalResults?: number;
-    // Dual search stats
-    fileResults?: boolean;
-    tavilyResults?: boolean;
-    totalCitations?: number;
-    // General search filtering stats
-    generalSearchTotal?: number;
-    filteredFromGeneral?: number;
-  };
+  content:
+    | string
+    | Suggestion
+    | {
+        step: string;
+        message: string;
+        keywords?: string[];
+        searchQuery?: string;
+        resultsCount?: number;
+        resultsFound?: boolean;
+        // Legacy search stats (tavily tool)
+        policyResults?: number;
+        mainResults?: number;
+        totalResults?: number;
+        // Dual search stats
+        fileResults?: boolean;
+        tavilyResults?: boolean;
+        totalCitations?: number;
+        // General search filtering stats
+        generalSearchTotal?: number;
+        filteredFromGeneral?: number;
+      };
 };
 
 export function DataStreamHandler({ id }: { id: string }) {

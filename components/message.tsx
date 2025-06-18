@@ -165,7 +165,11 @@ const PurePreviewMessage = ({
                     <div
                       key={toolCallId}
                       className={cx({
-                        skeleton: ['getWeather', 'tavilyFileSearch', 'dualSearch'].includes(toolName),
+                        skeleton: [
+                          'getWeather',
+                          'tavilyFileSearch',
+                          'dualSearch',
+                        ].includes(toolName),
                       })}
                     >
                       {toolName === 'getWeather' ? (
@@ -184,7 +188,8 @@ const PurePreviewMessage = ({
                           args={args}
                           isReadonly={isReadonly}
                         />
-                      ) : toolName === 'tavilyFileSearch' || toolName === 'dualSearch' ? (
+                      ) : toolName === 'tavilyFileSearch' ||
+                        toolName === 'dualSearch' ? (
                         <SearchToolCall args={args} />
                       ) : null}
                     </div>
@@ -215,7 +220,8 @@ const PurePreviewMessage = ({
                           result={result}
                           isReadonly={isReadonly}
                         />
-                      ) : toolName === 'tavilyFileSearch' || toolName === 'dualSearch' ? (
+                      ) : toolName === 'tavilyFileSearch' ||
+                        toolName === 'dualSearch' ? (
                         <SearchToolResult result={result} />
                       ) : (
                         <pre>{JSON.stringify(result, null, 2)}</pre>

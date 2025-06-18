@@ -157,8 +157,8 @@ export async function POST(request: Request) {
               ? []
               : [
                   'getWeather',
-                  'createDocument',    
-                  'updateDocument',     
+                  'createDocument',
+                  'updateDocument',
                   'requestSuggestions',
                   'dualSearch',
                 ],
@@ -240,11 +240,13 @@ export async function POST(request: Request) {
     if (error instanceof ChatSDKError) {
       return error.toResponse();
     }
-    
+
     console.error('Unexpected error in chat route:', error);
     return new Response(
-      JSON.stringify({ error: 'Something went wrong. Please try again later.' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      JSON.stringify({
+        error: 'Something went wrong. Please try again later.',
+      }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } },
     );
   }
 }

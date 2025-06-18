@@ -188,7 +188,9 @@ function PureMultimodalInput({
   const handleRemoveAttachment = useCallback(
     (attachmentUrl: string) => {
       setAttachments((currentAttachments) =>
-        currentAttachments.filter((attachment) => attachment.url !== attachmentUrl)
+        currentAttachments.filter(
+          (attachment) => attachment.url !== attachmentUrl,
+        ),
       );
     },
     [setAttachments],
@@ -254,9 +256,9 @@ function PureMultimodalInput({
           className="flex flex-row gap-2 overflow-x-scroll items-end"
         >
           {attachments.map((attachment) => (
-            <PreviewAttachment 
-              key={attachment.url} 
-              attachment={attachment} 
+            <PreviewAttachment
+              key={attachment.url}
+              attachment={attachment}
               onRemove={() => handleRemoveAttachment(attachment.url)}
             />
           ))}
@@ -403,7 +405,9 @@ function PureSendButton({
         submitForm();
       }}
       disabled={input.length === 0 || uploadQueue.length > 0}
-      variant={input.length > 0 && uploadQueue.length === 0 ? "vinuni" : "outline"}
+      variant={
+        input.length > 0 && uploadQueue.length === 0 ? 'vinuni' : 'outline'
+      }
     >
       <ArrowUpIcon size={14} />
     </Button>

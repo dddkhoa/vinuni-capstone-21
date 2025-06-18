@@ -28,8 +28,16 @@ export const PreviewAttachment = ({
             />
           ) : contentType === 'application/pdf' ? (
             <div className="flex flex-col items-center justify-center text-zinc-500 text-xs p-1">
-              <svg className="w-4 h-4 mb-1" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+              <svg
+                className="size-4 mb-1"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                  clipRule="evenodd"
+                />
               </svg>
               <span className="text-[10px] text-center leading-tight max-w-full truncate px-1">
                 {name || 'PDF'}
@@ -54,7 +62,7 @@ export const PreviewAttachment = ({
         {!isUploading && onRemove && (
           <button
             onClick={onRemove}
-            className="absolute -top-1 -right-1 w-5 h-5 bg-zinc-500 hover:bg-zinc-600 text-white rounded-full flex items-center justify-center"
+            className="absolute -top-1 -right-1 size-5 bg-zinc-500 hover:bg-zinc-600 text-white rounded-full flex items-center justify-center"
             type="button"
             aria-label="Remove attachment"
           >

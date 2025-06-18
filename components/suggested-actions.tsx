@@ -62,7 +62,9 @@ function PureSuggestedActions({ chatId, append }: SuggestedActionsProps) {
             }}
             className="text-left border border-vinuni-blue/20 hover:border-vinuni-blue/40 hover:bg-vinuni-blue/5 rounded-xl px-4 py-3.5 text-sm flex-1 gap-1 sm:flex-col w-full h-auto justify-start items-start transition-colors"
           >
-            <span className="font-medium text-vinuni-blue">{suggestedAction.title}</span>
+            <span className="font-medium text-vinuni-blue">
+              {suggestedAction.title}
+            </span>
             <span className="text-muted-foreground">
               {suggestedAction.label}
             </span>
